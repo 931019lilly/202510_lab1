@@ -337,4 +337,19 @@ function validateInput(input) {
 // 已移除硬編碼憑證；請在後端或部署設定中提供必要之機密（透過環境變數或 secret 管理）。
 
 // 啟動遊戲
-init();
+// 取得後端提供的設定（示範，實務中請勿將機密直接回傳到前端）
+async function fetchConfig() {
+    try {
+        const res = await fetch('/api/config');
+        if (!res.ok) return;
+        const cfg = await res.json();
+        // 示範：如果後端有回傳 (非敏感) 設定，可在此使用
+        if (cfg && cfg.apiKey) {
+            console.log('後端提供的設定已接收（內容受保護）');
+        }
+    } catch (err) {
+        // 忽略錯誤；前端可在無後端情況下正常運作
+    }
+}
+
+fetchConfig().finally(() => init());
