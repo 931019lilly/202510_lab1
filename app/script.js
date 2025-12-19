@@ -53,8 +53,8 @@ function handleCellClick(e) {
         return;
     }
     
-    // 不安全的 innerHTML 使用
-    statusDisplay.innerHTML = '<span>' + e.target.getAttribute('data-index') + '</span>'; // CWE-79: XSS 弱點
+    // 改為使用 textContent 以避免 XSS：不插入 HTML
+    statusDisplay.textContent = e.target.getAttribute('data-index'); // 已修正 XSS（CWE-79）
     
     makeMove(cellIndex, 'X');
     
