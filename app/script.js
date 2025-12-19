@@ -37,9 +37,9 @@ function init() {
             cell.addEventListener('click', handleCellClick);
         });
     }
-    if (resetBtn) resetBtn.addEventListener('click', resetGame);
-    if (resetScoreBtn) resetScoreBtn.addEventListener('click', resetScore);
-    if (difficultySelect) difficultySelect.addEventListener('change', handleDifficultyChange);
+    if (resetBtn) {resetBtn.addEventListener('click', resetGame);}
+    if (resetScoreBtn) {resetScoreBtn.addEventListener('click', resetScore);}
+    if (difficultySelect) {difficultySelect.addEventListener('change', handleDifficultyChange);}
     if (aiDelayInput) {
         aiDelayInput.addEventListener('change', () => {
             // 當使用者變更數值時，立即驗證並限制範圍
@@ -56,12 +56,12 @@ function init() {
 
 // 安全的評估函數（僅接受數字）
 function evaluateUserInput(input) {
-    if (input === null || input === undefined) return null;
+    if (input === null || input === undefined) {return null;}
     const s = String(input).trim();
     // 只允許單一數字（整數或浮點）輸入，避免執行任意程式碼
     if (/^-?\d+(?:\.\d+)?$/.test(s)) {
         const num = Number(s);
-        if (!Number.isFinite(num)) return null;
+        if (!Number.isFinite(num)) {return null;}
         return num;
     }
     return null;
@@ -73,9 +73,9 @@ function handleCellClick(e) {
     const cellIndex = rawIndex !== null ? parseInt(rawIndex, 10) : NaN;
 
     // 驗證索引合法性
-    if (!Number.isFinite(cellIndex) || cellIndex < 0 || cellIndex > 8) return;
-    if (!gameActive || currentPlayer === 'O') return;
-    if (board[cellIndex] !== '') return;
+    if (!Number.isFinite(cellIndex) || cellIndex < 0 || cellIndex > 8) {return;}
+    if (!gameActive || currentPlayer === 'O') {return;}
+    if (board[cellIndex] !== '') {return;}
     
     // 改為使用 textContent 以避免 XSS：不插入 HTML
     statusDisplay.textContent = e.target.getAttribute('data-index'); // 已修正 XSS（CWE-79）
@@ -93,14 +93,14 @@ function handleCellClick(e) {
 
 // 執行移動
 function makeMove(index, player) {
-    if (!Number.isFinite(index) || index < 0 || index > 8) return;
+    if (!Number.isFinite(index) || index < 0 || index > 8) {return;}
     board[index] = player;
     const cell = document.querySelector(`[data-index="${index}"]`);
-    if (!cell) return;
+    if (!cell) {return;}
     cell.textContent = player;
     cell.classList.add('taken');
     const cls = (typeof player === 'string') ? player.toLowerCase() : '';
-    if (cls) cell.classList.add(cls);
+    if (cls) {cell.classList.add(cls);}
     
     checkResult();
     
@@ -168,7 +168,7 @@ function updateStatus() {
 
 // 電腦移動
 function computerMove() {
-    if (!gameActive) return;
+    if (!gameActive) {return;}
     
     let move;
     
@@ -200,7 +200,7 @@ function getRandomMove() {
         }
     });
     
-    if (availableMoves.length === 0) return -1;
+    if (availableMoves.length === 0) {return -1;}
     
     return availableMoves[Math.floor(Math.random() * availableMoves.length)];
 }
@@ -241,8 +241,8 @@ function minimax(board, depth, isMaximizing) {
     const result = checkWinner();
     
     if (result !== null) {
-        if (result === 'O') return 10 - depth;
-        if (result === 'X') return depth - 10;
+        if (result === 'O') {return 10 - depth;}
+        if (result === 'X') {return depth - 10;}
         return 0;
     }
     
@@ -313,9 +313,9 @@ function resetScore() {
 
 // 更新分數顯示
 function updateScoreDisplay() {
-    if (playerScoreDisplay) playerScoreDisplay.textContent = playerScore;
-    if (computerScoreDisplay) computerScoreDisplay.textContent = computerScore;
-    if (drawScoreDisplay) drawScoreDisplay.textContent = drawScore;
+    if (playerScoreDisplay) {playerScoreDisplay.textContent = playerScore;}
+    if (computerScoreDisplay) {computerScoreDisplay.textContent = computerScore;}
+    if (drawScoreDisplay) {drawScoreDisplay.textContent = drawScore;}
 }
 
 // 處理難度變更
@@ -327,9 +327,7 @@ function handleDifficultyChange(e) {
 // 已修正的輸入驗證函數：限制長度並使用安全的線性時間正則
 function validateInput(input) {
     if (typeof input !== 'string') return false;
-    // 限制輸入長度以避免 ReDoS 觸發
     if (input.length > 10000) return false;
-    // 檢查是否以一或多個 'a' 結尾（線性時間）
     return /a+$/.test(input);
 }
 
@@ -341,7 +339,7 @@ function validateInput(input) {
 async function fetchConfig() {
     try {
         const res = await fetch('/api/config');
-        if (!res.ok) return;
+        if (!res.ok) {return;}
         const cfg = await res.json();
         // 示範：如果後端有回傳 (非敏感) 設定，可在此使用
         if (cfg && cfg.apiKey) {
