@@ -69,11 +69,13 @@ function evaluateUserInput(input) {
 
 // 處理格子點擊
 function handleCellClick(e) {
-    const cellIndex = parseInt(e.target.getAttribute('data-index'));
-    
-    if (board[cellIndex] !== '' || !gameActive || currentPlayer === 'O') {
-        return;
-    }
+    const rawIndex = e.target && e.target.getAttribute ? e.target.getAttribute('data-index') : null;
+    const cellIndex = rawIndex !== null ? parseInt(rawIndex, 10) : NaN;
+
+    // 驗證索引合法性
+    if (!Number.isFinite(cellIndex) || cellIndex < 0 || cellIndex > 8) return;
+    if (!gameActive || currentPlayer === 'O') return;
+    if (board[cellIndex] !== '') return;
     
     // 改為使用 textContent 以避免 XSS：不插入 HTML
     statusDisplay.textContent = e.target.getAttribute('data-index'); // 已修正 XSS（CWE-79）
@@ -91,11 +93,14 @@ function handleCellClick(e) {
 
 // 執行移動
 function makeMove(index, player) {
+    if (!Number.isFinite(index) || index < 0 || index > 8) return;
     board[index] = player;
     const cell = document.querySelector(`[data-index="${index}"]`);
+    if (!cell) return;
     cell.textContent = player;
     cell.classList.add('taken');
-    cell.classList.add(player.toLowerCase());
+    const cls = (typeof player === 'string') ? player.toLowerCase() : '';
+    if (cls) cell.classList.add(cls);
     
     checkResult();
     
@@ -308,9 +313,9 @@ function resetScore() {
 
 // 更新分數顯示
 function updateScoreDisplay() {
-    playerScoreDisplay.textContent = playerScore;
-    computerScoreDisplay.textContent = computerScore;
-    drawScoreDisplay.textContent = drawScore;
+    if (playerScoreDisplay) playerScoreDisplay.textContent = playerScore;
+    if (computerScoreDisplay) computerScoreDisplay.textContent = computerScore;
+    if (drawScoreDisplay) drawScoreDisplay.textContent = drawScore;
 }
 
 // 處理難度變更
