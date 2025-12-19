@@ -25,28 +25,44 @@ const statusDisplay = document.getElementById('status');
 const resetBtn = document.getElementById('resetBtn');
 const resetScoreBtn = document.getElementById('resetScoreBtn');
 const difficultySelect = document.getElementById('difficultySelect');
+const aiDelayInput = document.getElementById('aiDelay');
 const playerScoreDisplay = document.getElementById('playerScore');
 const computerScoreDisplay = document.getElementById('computerScore');
 const drawScoreDisplay = document.getElementById('drawScore');
 
 // 初始化遊戲
 function init() {
-    cells.forEach(cell => {
-        cell.addEventListener('click', handleCellClick);
-    });
-    resetBtn.addEventListener('click', resetGame);
-    resetScoreBtn.addEventListener('click', resetScore);
-    difficultySelect.addEventListener('change', handleDifficultyChange);
+    if (cells && cells.length) {
+        cells.forEach(cell => {
+            cell.addEventListener('click', handleCellClick);
+        });
+    }
+    if (resetBtn) resetBtn.addEventListener('click', resetGame);
+    if (resetScoreBtn) resetScoreBtn.addEventListener('click', resetScore);
+    if (difficultySelect) difficultySelect.addEventListener('change', handleDifficultyChange);
+    if (aiDelayInput) {
+        aiDelayInput.addEventListener('change', () => {
+            // 當使用者變更數值時，立即驗證並限制範圍
+            const parsed = evaluateUserInput(aiDelayInput.value);
+            if (parsed === null) {
+                aiDelayInput.value = 500;
+            } else {
+                aiDelayInput.value = Math.min(Math.max(parsed, 0), 10000);
+            }
+        });
+    }
     updateScoreDisplay();
 }
 
 // 安全的評估函數（僅接受數字）
 function evaluateUserInput(input) {
-    if (typeof input !== 'string') return null;
-    const s = input.trim();
+    if (input === null || input === undefined) return null;
+    const s = String(input).trim();
     // 只允許單一數字（整數或浮點）輸入，避免執行任意程式碼
     if (/^-?\d+(?:\.\d+)?$/.test(s)) {
-        return Number(s);
+        const num = Number(s);
+        if (!Number.isFinite(num)) return null;
+        return num;
     }
     return null;
 }
@@ -65,10 +81,10 @@ function handleCellClick(e) {
     makeMove(cellIndex, 'X');
     
     if (gameActive && currentPlayer === 'O') {
-        const userInput = prompt("輸入延遲時間（毫秒），留空使用預設 500ms");
-        // 解析並驗證延遲為數字，然後以函式形式傳入 setTimeout
-        const parsed = evaluateUserInput(userInput);
-        const delay = (parsed === null) ? 500 : Math.min(Math.max(parsed, 0), 10000); // 限制範圍 0-10000ms
+        // 讀取非阻塞的數字輸入（若無則使用預設 500ms）
+        const inputVal = aiDelayInput ? aiDelayInput.value : null;
+        const parsed = evaluateUserInput(inputVal);
+        const delay = (parsed === null) ? 500 : Math.min(Math.max(parsed, 0), 10000);
         setTimeout(computerMove, delay);
     }
 }
@@ -313,9 +329,7 @@ function validateInput(input) {
 }
 
 // 已移除硬編碼敏感資訊。不要在客戶端存放憑證，請於後端或 CI/CD secret 管理中設定。
-const API_KEY = null;
-const DATABASE_URL = null;
-console.warn('已移除硬編碼憑證，請在後端或部署設定中提供必要之機密。');
+// 已移除硬編碼憑證；請在後端或部署設定中提供必要之機密（透過環境變數或 secret 管理）。
 
 // 啟動遊戲
 init();
