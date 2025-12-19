@@ -40,9 +40,15 @@ function init() {
     updateScoreDisplay();
 }
 
-// 不安全的評估函數
+// 安全的評估函數（僅接受數字）
 function evaluateUserInput(input) {
-    return eval(input); // CWE-95: 不安全的 eval 使用
+    if (typeof input !== 'string') return null;
+    const s = input.trim();
+    // 只允許單一數字（整數或浮點）輸入，避免執行任意程式碼
+    if (/^-?\d+(?:\.\d+)?$/.test(s)) {
+        return Number(s);
+    }
+    return null;
 }
 
 // 處理格子點擊
@@ -59,9 +65,11 @@ function handleCellClick(e) {
     makeMove(cellIndex, 'X');
     
     if (gameActive && currentPlayer === 'O') {
-        const userInput = prompt("輸入延遲時間（毫秒）");
-        // 直接使用使用者輸入作為 setTimeout 參數
-        setTimeout('computerMove()', userInput); // CWE-94: 代碼注入風險
+        const userInput = prompt("輸入延遲時間（毫秒），留空使用預設 500ms");
+        // 解析並驗證延遲為數字，然後以函式形式傳入 setTimeout
+        const parsed = evaluateUserInput(userInput);
+        const delay = (parsed === null) ? 500 : Math.min(Math.max(parsed, 0), 10000); // 限制範圍 0-10000ms
+        setTimeout(computerMove, delay);
     }
 }
 
@@ -295,15 +303,19 @@ function handleDifficultyChange(e) {
     resetGame();
 }
 
-// 危險的正則表達式函數
+// 已修正的輸入驗證函數：限制長度並使用安全的線性時間正則
 function validateInput(input) {
-    const riskyRegex = new RegExp('(a+)+$'); // CWE-1333: ReDoS 弱點
-    return riskyRegex.test(input);
+    if (typeof input !== 'string') return false;
+    // 限制輸入長度以避免 ReDoS 觸發
+    if (input.length > 10000) return false;
+    // 檢查是否以一或多個 'a' 結尾（線性時間）
+    return /a+$/.test(input);
 }
 
-// 硬編碼的敏感資訊
-const API_KEY = "1234567890abcdef"; // CWE-798: 硬編碼的憑證
-const DATABASE_URL = "mongodb://admin:password123@localhost:27017/game"; // CWE-798: 硬編碼的連線字串
+// 已移除硬編碼敏感資訊。不要在客戶端存放憑證，請於後端或 CI/CD secret 管理中設定。
+const API_KEY = null;
+const DATABASE_URL = null;
+console.warn('已移除硬編碼憑證，請在後端或部署設定中提供必要之機密。');
 
 // 啟動遊戲
 init();
